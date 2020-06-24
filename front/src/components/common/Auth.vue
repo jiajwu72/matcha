@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import Connexion from '@/components/commun/Connexion';
+import Connexion from '@/components/common/Connexion';
 export default{
 
   name:"Auth",

@@ -30,7 +30,7 @@
                     @click="dirige()"
 
             >
-              <v-icon>mdi-account</v-icon>Espace Client
+              <v-icon>mdi-account</v-icon>Profil
             </v-btn>
         </v-toolbar-items>
 
@@ -167,22 +167,22 @@ var currentScrollPos = window.pageYOffset;
 
 
 // import ShoppingCard from '@/components/commun/ShoppingCard';
-// import Modal from '@/components/commun/Modal';
-// import Auth from '@/components/common/Auth';
+import Modal from '@/components/common/Modal';
+import Auth from '@/components/common/Auth';
 export default{
 
   name:"Header",
   components: {
     // ShoppingCard,
-    // Modal,
-    // Auth,
+    Modal,
+    Auth,
   },
   data() {
     return {
       step:0,
       connect:false,
       dialog:false,
-      drawer:false,
+      drawer:true,
       drawer2:false,
       menuInitial:[],
       searchItem:"",
@@ -249,18 +249,9 @@ export default{
       console.log("submit")
     },
     dirige(){
-      //this.action=tag
-      // if(tag=="shoppingCard")
-      // {
-      //   this.drawer2=true
-      // }
-      // if(tag=="clientSpace")
-      // {
-      //   this.alertAuth=true
-      //   console.log("clientSpace")
-      // }
+
       console.log("dirige")
-      this.connect=true;
+      this.alertAuth=true;
     },
     update(val){
       this.alertAuth=val;

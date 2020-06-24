@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Card :color="'beige'" class="card_box">
+    <!-- <Card :color="'beige'" class="card_box"> -->
 
     <GmapMap
         :center="{lat:49.0954795, lng:2.7483926}"
@@ -33,17 +33,17 @@
         Explore
       </v-btn>
     </v-card-actions> -->
-    </Card>
+    <!-- </Card> -->
   </div>
 </template>
 
 <script>
-  import Card from '@/components/commun/Card';
+  // import Card from '@/components/commun/Card';
   import {gmapApi} from 'vue2-google-maps'
   export default{
     name:"GoogleMap",
     components:{
-      Card,
+      // Card,
     },
 
 
