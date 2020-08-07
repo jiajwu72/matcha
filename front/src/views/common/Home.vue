@@ -6,14 +6,14 @@
     </Carousel> -->
     <!-- <v-parallax src="/images/bg1.jpg" height=900></v-parallax> -->
     <v-img src="/images/bg1.jpg">
-      <v-dialog v-model="connect">
-        lqlq
-      </v-dialog>
+      <!-- <v-dialog v-model="connect">
+
+      </v-dialog> -->
       <div class="bg">
         <strong style="font-size:50px;color:white;">
           Match your love partner
         </strong><br><br><br><br>
-        <v-btn icon>
+        <v-btn icon @click="go">
           <v-icon style="font-size:80px;cursor:pointer;color:#EA1713;">mdi-hand-heart</v-icon>
         </v-btn>
       </div>
@@ -37,33 +37,26 @@
        // GoogleMap,
        // Card,
     },
-
+    // props:[
+    //   //'category'
+    //   'notConnected'
+    // ],
     data() {
       return{
         connect:false,
-        // slidesItem:[
-        //   {
-        //     src: '/images/bg0.jpg',
-        //   },
-        //   {
-        //     src: '/images/bg1.jpg',
-        //   },
-        //   {
-        //     src: '/images/bg2.jpg',
-        //   },
-        //   {
-        //     src: '/images/bg3.jpg',
-        //   },
-        //   {
-        //     src: '/images/bg4.jpg',
-        //   },
-        // ],
 
       }
     },
 
     created() {
+      console.log("notConnected:",this.notConnected)
+      //localStorage.removeItem('jwt')
+    },
 
+    methods: {
+      go(){
+        window.location="/match"
+      }
     },
   }
 </script>

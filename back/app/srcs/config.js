@@ -1,13 +1,14 @@
 const config = {};
-
+require("dotenv").config()
+//console.log(process.env)
 config.database = {
-  host: 'mongodb://192.168.99.100',
-  dbName: 'test',
+  host: process.env.DB_HOST,
+  dbName: process.env.DB_NAME,
   port: '27018',
-  user: 'root',
-  password: 'example',
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
 }
-
+//console.log(config.database)
 /*
 config.database = {
   host: 'mongodb://localhost',

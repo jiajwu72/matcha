@@ -18,7 +18,11 @@
     components:{
       Header,
       Footer,
-    }
+    },
+    // props:[
+    //   //'category'
+    //   'notConnected'
+    // ],
   }
 </script>
 

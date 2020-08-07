@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Card :color="'beige'" class="card_box">
+    <v-card :color="'beige'" class="card_box">
 
     <GmapMap
         :center="{lat:49.0954795, lng:2.7483926}"
@@ -11,40 +11,24 @@
     <GmapMarker ref="myMarker"
       :position="google && new google.maps.LatLng(49.0954795, 2.7483926)" />
     </GmapMap>
-      <v-card-title>Retrouvez notre magasin sur google map</v-card-title>
-    <v-card-text class="text--primary">
+      <!-- <v-card-title>Retrouvez notre magasin sur google map</v-card-title> -->
+    <!-- <v-card-text class="text--primary">
       <div>45 Route de Paris</div>
       <div>60330</div>
       <div>Le Plessis-Belleville</div>
-    </v-card-text>
-
-    <!-- <v-card-actions>
-      <v-btn
-        color="orange"
-        text
-      >
-        Share
-      </v-btn>
-
-      <v-btn
-        color="orange"
-        text
-      >
-        Explore
-      </v-btn>
-    </v-card-actions> -->
-    </Card>
+    </v-card-text> -->
+  </v-card>
   </div>
 </template>
 
 <script>
-  import Card from '@/components/commun/Card';
+  // import Card from '@/components/commun/Card';
   import {gmapApi} from 'vue2-google-maps'
   export default{
     name:"GoogleMap",
-    components:{
-      Card,
-    },
+    // components:{
+    //   Card,
+    // },
 
 
     computed: {

@@ -7,11 +7,11 @@
         <v-text-field label="Email*" required></v-text-field>
       </v-row>
       <v-row>
-        <v-text-field label="Mot de passe*" required></v-text-field>
+        <v-text-field type="password" label="Mot de passe*" required></v-text-field>
       </v-row>
       <v-row>
         <v-btn dark>
-          Valider
+          Validerr
         </v-btn>
       </v-row>
       <v-row>

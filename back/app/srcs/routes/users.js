@@ -1,25 +1,16 @@
-var express = require('express');
-var router = express.Router();
-const controller = require('../controller/User');
-//const authController = require('../controller/Auth');
-const authMw=require("../middleware/auth");
-/*
-const visitorMw=require("../middleware/visitor");
-const dynamicMiddleware = require('express-dynamic-middleware');
 
+var express=require('express');
+var router=express.Router();
+const controller=require('../controller/User');
 
-const dynamicAuth=dynamicMiddleware.create(authMw);
-const dynamicVisitor=dynamicMiddleware.create(visitorMw);
-*/
-
-
-router.get('/', controller.findAll)					//list users
-		.post('/',controller.register)				//register a user
-
-router.post('/login',controller.login);				//log a user
-router.get('/:username',controller.findOne)			//search a user return info
-	.put('/:username',controller.update);			//update a user
-router.put('/:username/resetPassword',controller.updatePassword); //update user password
-
+router.get('/:id/get',controller.getInfo) //get user information
+router.post('/add',controller.addUser)  //add users
+router.post('/:id/update',controller.updateInfo)  //update users
+router.post('/:id/defineProfil',controller.defineProfil)  //update users
+router.post('/auth',controller.auth)  //connect users
+router.post('/logout',controller.logout)  //logout users
+router.post('/forgot',controller.forgot)  //forgot password/verrif user email
+router.get('/reset/:token',controller.resetCheck)  //verrif forgot token
+router.post('/reset/:token',controller.reset)  //list users
 
 module.exports = router;

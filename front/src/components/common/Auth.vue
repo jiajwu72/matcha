@@ -1,6 +1,6 @@
 <template>
   <div>
-    lalal
+    
     <Connexion v-if="step==0">
     </Connexion>
   </div>

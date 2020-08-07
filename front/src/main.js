@@ -17,6 +17,15 @@ import vuetify from './plugins/vuetify';
 import VueRouter from 'vue-router'
 import * as VueGoogleMaps from 'vue2-google-maps'
 Vue.use(require('vue-cookies'))
+import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
+import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap-vue/dist/bootstrap-vue.css'
+import axios from 'axios'
+import VueAxios from 'vue-axios'
+require('dotenv').config()
+
+// import 'vue-suggestion/dist/vue-suggestion.css';
+
 // es2015 module
 import VueCookies from 'vue-cookies'
 Vue.use(VueCookies)
@@ -28,7 +37,12 @@ Vue.$cookies.config('7d')
 Vue.$cookies.set('theme','default');
 Vue.$cookies.set('hover-time','1s');
 
+// Install BootstrapVue
+Vue.use(BootstrapVue)
+// Optionally install the BootstrapVue icon components plugin
+Vue.use(IconsPlugin)
 
+Vue.use(VueAxios, axios)
 
 Vue.config.productionTip = false
 Vue.use(router)

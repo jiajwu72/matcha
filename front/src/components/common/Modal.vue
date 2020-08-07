@@ -23,6 +23,7 @@
 
               <div class="modal-footer">
                 <slot name="footer">
+
                   <!-- default footer
                   <button class="modal-default-button" @click="$emit('close')">
                     OK
@@ -84,6 +85,7 @@ export default{
 
 .modal-mask {
   position: fixed;
+
   z-index: 9998;
   top: 0;
   left: 0;

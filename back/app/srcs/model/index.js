@@ -1,21 +1,13 @@
-const mongoose=require("mongoose");
-const config = require('../config')
 
-const db = config.database;
-try{
+const config=require('../config')
+var mysql      = require('mysql');
+var connection = mysql.createConnection({
+  host     : config.database.host,
+  user     : config.database.user,
+  password : config.database.password,
+  database : config.database.dbName
+});
 
-	mongoose.connect(db.host + ':' + db.port,
-    {
-      useNewUrlParser: true,
-      user: db.user,
-      pass: db.password,
-      dbName: db.dbName,
-    });
-    
-}catch(err){
-	console.log(err)
-}
+//connection.connect();
 
-exports.mongoose=mongoose;
-// exports.db=db;
-
+module.exports=connection

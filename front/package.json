@@ -3,16 +3,29 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
+    "serve": "vue-cli-service serve --port 8081",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "ant-design-vue": "^1.6.3",
+    "axios": "^0.19.2",
+    "bootstrap": "^4.5.0",
+    "bootstrap-vue": "^2.15.0",
     "core-js": "^3.6.5",
+    "dotenv": "^8.2.0",
+    "jsonwebtoken": "^8.5.1",
+    "postscribe": "^2.0.8",
     "vue": "^2.6.11",
+    "vue-axios": "^2.1.5",
+    "vue-google-autocomplete": "^1.1.0",
+    "vue-range-component": "^1.0.3",
     "vue-router": "^3.3.4",
+    "vue-slider-component": "^3.2.2",
+    "vue-suggestion": "^1.1.0",
     "vue2-google-maps": "^0.10.7",
-    "vuetify": "^2.2.11"
+    "vuetify": "^2.2.11",
+    "vuetify-google-autocomplete": "^2.0.2"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.4.0",

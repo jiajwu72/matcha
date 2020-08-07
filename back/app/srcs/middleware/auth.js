@@ -5,12 +5,10 @@ module.exports = (req, res, next) => {
   try {
     console.log(req.headers);
     const token = req.headers.authorization.split(' ')[1];
-    //console.log("0")
     const decodedToken = jwt.verify(token, 'RANDOM_TOKEN_SECRET');
-    //console.log("1")
-    const username = decodedToken.username;
-    console.log(username)
-    if (req.username && req.username !== username) {
+    const id = decodedToken.id;
+    console.log(id)
+    if (req.id && req.id !== id) {
       throw 'Invalid user info';
     } else {
       next();

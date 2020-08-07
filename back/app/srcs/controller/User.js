@@ -1,110 +1,226 @@
 const UserModel = require('../model/User');
-const bcrypt=require("bcrypt");
-var salt = bcrypt.genSaltSync(10);
+const crypto=require("crypto");
+const async=require("async");
+const nodemailer=require('nodemailer')
 
 
 class UserController {
 
-  
-  update(req, res) {
-      
-      const username=req.params.username;
-      const updateInfo=req.body;
-
-      /*
-      if(updateInfo.password)
-      {
-        updateInfo.password = bcrypt.hashSync(updateInfo.password, salt);
+  getInfo(req,res){
+    // const userId=req.params.id;
+    // const user=req.body
+    const user=req.params
+    // console.log(user)
+    UserModel.searchBy(user)
+    .then((result)=>{
+      // console.log(result)
+      if(result){
+        res.send({res:result})
       }
-      */
-      UserModel.update({"username":username},{$set:updateInfo},function(err,doc){
-        if (err || !updateInfo.username)
-          res.status(401).json({"msg":"update user error"});
-        else
-          res.status(200).json({"msg":"update success!"});
-      });
+      else {
+        res.send({error:"userId n'est pas correcte"})
+      }
+    })
+    .catch((e)=>{
+      // console.log(err)
+      res.send({error:e})
+    })
+    // UserModel.getInfo(userId)
   }
 
-/**
-*   {oldPassword:"",newPassword:""}
-*/
-
-  updatePassword(req, res) {
-    const info = req.body;
-    const username=req.params.username;
-    //console.log(username);
-    UserModel.findOne({"username":username}).then((user)=>{
-      if (user){
-        const valid=user.validatePassword(info.oldPassword);
-        //console.log(valid)
-        if (valid)
-        {
-          const newPassword = bcrypt.hashSync(info.newPassword, salt);
-          //console.log(newPassword);
-          user.password=newPassword;
-          user.save();
-          res.status(200).json({"msg":"password is changed"});
-        }
-        else
-          res.status(401).json({"msg":"password is incorrect"});
-      }
-      else{
-        res.status(401).json({"msg":"user not found"});
-      }
+  addUser(req,res){
+    UserModel.addUser(req.body)
+    .then((result)=>{
+      // res.status(200).json({res:result})
+      res.send({res:result})
+    })
+    .catch((e)=>{
+      // res.status(500).json({error:e})
+      res.send({error:e})
     })
   }
 
-  findAll(req, res) {
-    UserModel.find({}, function(err,docs){
-      //res.send(docs);
-      res.status(200).json(docs);
-    });
-  }
-
-  findOne(req,res){
-    const search=req.params.username;
-    console.log("request:"+search)
-    UserModel.findOne({"username":search}, function(err,docs){
-      console.log()
-      res.send(docs);
-    });
-  }
-
-  register(req, res) {
-    const user=req.body;
-    var salt = bcrypt.genSaltSync(10);
-    user.password = bcrypt.hashSync(user.password, salt);
-    UserModel.create(user, function (err, doc) {
-      if (err) {
-        res.status(401).json({"msg":"create user error"});
-      } else {
-        res.status(200).json({"msg":"add success!"});
-      }
-    });
-  }
-
-  login(req,res){
-    const info=req.body;
-    UserModel.findOne({"username":info.username})
-    .then((user)=>{
-      //console.log(user)
-      if (user)
-      {
-        const success=user.validatePassword(info.password)
-        console.log("msg1:",success)
-        if(success)
-          res.status(200).json({"token":user.generateJWT()});
-        else
-          res.status(401).json({"msg":"password incorrect"});
-      
-      }else{
-        res.status(401).json({"msg":"login error"});
-      }
+  updateInfo(req,res){
+    const user=req.body
+    console.log("updateInfo");
+    console.log(user);
+    UserModel.save(user)
+    .then((result)=>{
+      // res.status(200).json({res:result})
+      res.send("Vos informations ont bien été mise à jours")
     })
-    
+    .catch((e)=>{
+      // res.status(500).json({error:e})
+      res.send({error:e})
+    })
   }
 
+  auth(req,res){
+    UserModel.auth(req.body)
+    .then((result)=>{
+      console.log(result)
+      res.status(200).json(result)
+    })
+    .catch((e)=>{
+      // res.send({error:e})
+      console.log(e)
+      console.log("here")
+      // res.status(500).json({error:e})
+      res.send({error:e})
+    })
+  }
+
+logout(req,res){
+  console.log("logout");
+  const user=req.body;
+  user.access_token=null;
+  user.online=0;
+  console.log(user);
+  UserModel.save(user)
+  .then((result)=>{
+    res.send({res:true})
+  })
+  .catch((e)=>{
+    res.send({res:false})
+  })
 }
 
+  forgot(req,res){
+    console.log("forgot")
 
+    const user=req.body;
+    // console.log(user);
+    UserModel.searchBy(user)
+    .then((result)=>{
+      //console.log(result)
+      if(!result){
+        res.send({error:"Email n'existe pas"})
+      }else{
+        async.waterfall([
+          function(callback){
+            crypto.randomBytes(20, function(err, buf) {
+              var token = buf.toString('hex');
+              console.log(token)
+              callback(err, token);
+            });
+          },
+          function(token,callback){
+            // console.log(result)
+            user.id=result.id;
+            user.reset_token=token;
+            const decTime=3600000*2;
+            user.reset_at=(new Date(Date.now()+decTime+3600000)).toISOString().slice(0, 19).replace('T', ' ');
+            console.log(user.reset_at)
+            UserModel.save(user).then((result)=>{
+              console.log("save token");
+              callback(null,token)
+            })
+            .catch((e)=>{
+              // console.log(e);
+              callback(e,null)
+            })
+          },
+          async function(token,callback){
+            console.log("createTransport");
+            // console.log(process.env.MAILTRAP_USER);
+            // console.log(process.env.MAILTRAP_PASSWORD);
+            // console.log(req.headers.host);
+            var smtpTrans = await nodemailer.createTransport({
+               host: "smtp.mailtrap.io",
+               auth: {
+                user: process.env.MAILTRAP_USER,
+                pass: process.env.MAILTRAP_PASSWORD
+              }
+            });
+            // console.log(smtpTrans)
+            // console.log(process.env.FRONT_HOST);
+            var mailOptions = {
+
+              to: user.email,
+              from: 'myemail@mailtrap.com',
+              subject: 'MATCHA réinitialiser votre mot de passe',
+              text: 'Vous avez reçu cet e-mail car vous avez demandé un nouveau mot de passe.\n\n' +
+                 process.env.FRONT_HOST + 'reset/' + token + '\n\n'
+            };
+             smtpTrans.sendMail(mailOptions, function(err,info) {
+              if(err) console.log("err:",err)
+              else{
+                console.log("here")
+                res.send({success: 'Un email a été envoyé à ' + user.email + '.'});
+              }
+            })
+            console.log("fin");
+            // res.send({success: 'Un email a été envoyé à ' + user.email + '.'});
+          }
+        ],function(err){
+          // res.send({"error":err})
+          console.log("err:",err);
+        })
+      }
+    })
+  }
+
+  resetCheck(req,res){
+    console.log("resetCheck")
+    const token=req.params.token;
+    UserModel.searchToken(token)
+    .then((result)=>{
+      // res.send(result[0])
+      if(result && result[0])
+        res.send({res:true})
+      else {
+        res.send({error:"Le token n'est pas valide ou expiré"})
+      }
+    })
+    .catch((e)=>{
+      res.send({error:"Le token n'est pas valide ou expiré"})
+    })
+  }
+
+  reset(req,res){
+    console.log("reset");
+    const token=req.params.token;
+    const user=req.body
+    console.log("user:",user);
+    UserModel.searchToken(token)
+    .then((result)=>{
+      if(result && result[0])
+      {
+          console.log("reset searchToken success");
+          const user=req.body;
+          user.id=result[0].id
+
+          UserModel.setNewPassword(user)
+          .then((resp)=>{
+            console.log(resp);
+            res.send({res:resp})
+          })
+          .catch((e)=>{
+            res.send({error:e})
+          })
+      }
+      else {
+        console.log("Le token n'est pas valide ou expiré");
+        res.send({error:"Le token n'est pas valide ou expiré"})
+      }
+    })
+    .catch((e)=>{
+      // console.log("here");
+      res.send({error:"Le token n'est pas valide ou expiré"})
+    })
+  }
+
+  defineProfil(req,res){
+    console.log("defineProfil")
+    const user=req.body;
+    console.log(user);
+    UserModel.save(user)
+    .then((result)=>{
+      res.send({msg:"success"})
+    })
+    .catch((e)=>{
+      res.send({error:"error"})
+    })
+  }
+}
 module.exports = new UserController();
