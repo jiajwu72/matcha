@@ -4,7 +4,7 @@ require("dotenv").config()
 config.database = {
   host: process.env.DB_HOST,
   dbName: process.env.DB_NAME,
-  port: '27018',
+  //port: '27017',
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
 }

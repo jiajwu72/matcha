@@ -4,9 +4,11 @@
  * Module dependencies.
  */
 
-var app = require('../app');
+var app = require('../app').app;
+var server=require('../app').server;
 var debug = require('debug')('server:server');
-var http = require('http');
+// var http = require('http');
+// const socketIo=require("socket.io");
 
 /**
  * Get port from environment and store in Express.
@@ -14,18 +16,25 @@ var http = require('http');
 
 var port = normalizePort(process.env.PORT || '3001');
 app.set('port', port);
+var http = require('http');
 
 /**
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
+// var server = http.createServer(app);
 
+// var io = require('socket.io').listen(server);
+//app.set("io", io)
 /**
  * Listen on provided port, on all network interfaces.
  */
 
 server.listen(port);
+
+//listen socketIo to our express app
+// const io=socketIo(server)
+
 console.log("server listenning to port ",port)
 server.on('error', onError);
 server.on('listening', onListening);
@@ -89,4 +98,8 @@ function onListening() {
     ? 'pipe ' + addr
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
+}
+
+module.exports.getIO = function(){
+     return io;
 }

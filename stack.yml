@@ -18,24 +18,6 @@ services:
   #   networks:
   #     - default
 
-  front:
-    build: front
-    ports:
-      - '3001:3001'
-    # volumes:
-    #   - './front/src'
-
-    # depends_on:
-    #   - back
-    networks:
-      - default
-    environment:
-      - CHOKIDAR_USEPOLLING=true
-      # - "BACK_HOST=back:3001"
-      - DOCKER_HOST=${DOCKER_HOST}
-  #   tty: true
-#    logging:
-#      driver: none
 
   mongo:
     image: mongo
@@ -53,7 +35,7 @@ services:
     image: mongo-express
     restart: always
     ports:
-      - '18081:8081'
+      - '18082:8082'
     environment:
       ME_CONFIG_MONGODB_ADMINUSERNAME: root
       ME_CONFIG_MONGODB_ADMINPASSWORD: example

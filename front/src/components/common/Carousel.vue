@@ -1,86 +1,25 @@
 
 <template>
-  <v-carousel
-    cycle
-    height="770"
-    hide-delimiter-background
-    :show-arrows="false"
-  >
-
-    <v-carousel-item
-      v-for="(slide, i) in slides"
-      :key="i"
-      :src="slides[i].src"
-      class="bloc"
-
+  <div class="">
+    <v-carousel
+      cycle
+      height="770"
+      hide-delimiter-background
+      :show-arrows="false"
+      style="max-height:600px;"
+      reverse-transition="fade-transition"
+      transition="fade-transition"
     >
-    <!-- <div id="firefly">
-      jzhd
-</div> -->
-      <div class="content">
-        <!-- <v-container> -->
-          <v-row>
-            <!-- <v-col class="col" >
-              <div class="vetical-middle">
-                <a href="">
-                  <v-btn class="ma-2" tile outlined >
-                    Homme&nbsp;
-                  </v-btn>
-                </a>
-                <v-icon x-large v-if="isMobile==false">
-                  mdi-chevron-left
-                </v-icon>
-                <br><br>
-                <a href="">
-                  <v-btn class="ma-2" tile outlined >
-                    Garçon
-                  </v-btn>
-                </a>
-                <v-icon x-large v-if="isMobile==false">
-                  mdi-chevron-left
-                </v-icon>
-              </div>
-            </v-col> -->
+      <v-carousel-item
+        v-for="(slide, i) in slides"
+        :key="i"
+        :src="slides[i].src"
+        class="bloc"
+      >
+      </v-carousel-item>
+    </v-carousel>
+  </div>
 
-            <v-col class="col" style="text-align:center;" >
-              <div class="vetical-middle">
-              <label class="bigTitle"> Collection </label><br>
-              Promo du jour<br><br>
-              <v-btn class="ma-2" tile outlined @click="redirige">
-                View
-              </v-btn>
-              </div>
-            </v-col>
-
-            <!-- <v-col class="col" >
-              <div class="vetical-middle" style="float:right;">
-
-                <v-icon x-large v-if="isMobile==false">
-                  mdi-chevron-right
-                </v-icon>
-                <a href="">
-                  <v-btn class="ma-2" tile outlined >
-                    Femme
-                  </v-btn>
-                </a>
-                <br><br>
-                <v-icon x-large v-if="isMobile==false">
-                  mdi-chevron-right
-                </v-icon>
-                <a href="">
-                  <v-btn class="ma-2" tile outlined >
-                    Fille
-                  </v-btn>
-                </a>
-              </div>
-            </v-col> -->
-
-          </v-row>
-        <!-- </v-container> -->
-      </div>
-
-    </v-carousel-item>
-  </v-carousel>
 
 
 </template>
@@ -95,6 +34,8 @@
       }
     },
     created() {
+      console.log("Carousel");
+      console.log(this.slides);
       this.isMobile=this.detectMob();
       console.log(this.isMobile)
     },
@@ -169,7 +110,7 @@ label{
 }
 
 *{
-  color: white;
+  /* color: white; */
 }
 
 a{

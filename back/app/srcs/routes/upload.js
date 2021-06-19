@@ -120,11 +120,11 @@ var upload = multer({ storage: storage }).single("image");
 router.post("/",function(req,res){
   // console.log("update,req.body",req.body)
   upload(req, res, function (err) {
-
+    res.redirect(process.env.FRONT_HOST+"myProfile")
   })
 
 
-  res.redirect("back")
+  // res.redirect("back")
 
 })
 

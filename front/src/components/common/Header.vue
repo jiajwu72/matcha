@@ -27,16 +27,7 @@
             >
               <v-icon>mdi-account</v-icon>
             </v-btn>
-            <!-- <v-btn  style="background-color:rgba(0, 0, 0,0);">
-              <v-badge
-                :content="messages"
-                :value="messages"
-                color="green"
-                overlap
-              >
-                <v-icon large>mdi-bell</v-icon>
-              </v-badge>
-          </v-btn> -->
+
           <v-menu
           down
           offset-y
@@ -49,8 +40,7 @@
               v-on="on"
             >
             <v-badge
-              :content="notifs.length"
-              :value="notifs.length"
+              :content="notifsNoReaded()"
               color="green"
               overlap
             >
@@ -59,16 +49,24 @@
             </v-btn>
           </template>
 
-          <v-list down>
+          <v-list down >
             <v-list-item
               v-for="(item, i) in notifs"
               :key="i"
-
+              :class="['notif',item.readed?'':'noRead']"
+              @click="clickNotif(item)"
             >
-              <v-list-item-title class="notif">{{ item.msg }}</v-list-item-title>
+              <v-list-item-title>
+                <b-avatar button :src="item.from_user_profil"></b-avatar> {{ item.content }}
+              </v-list-item-title>
             </v-list-item>
           </v-list>
         </v-menu>
+        <v-btn  style="background-color:rgba(0, 0, 0,0);"
+                @click="logout()"
+        >
+          <v-icon>mdi-logout</v-icon>
+        </v-btn>
         </v-toolbar-items>
 
 
@@ -136,9 +134,9 @@
           <b-form @submit.stop.prevent="onSubmit">
             <b-alert show variant="danger" v-if="connexionError">{{connexionError}}</b-alert>
             <v-row>
-              <v-text-field label="Email*" v-model="connEmail" required></v-text-field>
+              <v-text-field label="Identifiant*" v-model="connIdentif" required></v-text-field>
             </v-row>
-            <div v-if="errors.connexion.email" class="validate">{{errors.connexion.email}}</div>
+            <div v-if="errors.connexion.identif" class="validate">{{errors.connexion.identif}}</div>
             <v-row>
               <v-text-field type="password" v-model="connPassword" label="Mot de passe*" required></v-text-field>
             </v-row>
@@ -164,15 +162,17 @@
         </div>
 
         <div v-if="step==1">
+          <b-alert v-if="inscriptionError" variant="danger" show>{{inscriptionError}}</b-alert>
+          <b-alert v-else-if="inscriptionSuccess" variant="success" show>{{inscriptionSuccess}}</b-alert>
           <b-form @submit.stop.prevent="inscrire">
+          <v-row>
+              <v-text-field label="Identifiant*" v-model="inscIdentif" required></v-text-field>
+          </v-row>
+          <div v-if="errors.inscription.identif" class="validate">{{errors.inscription.identif}}</div>
           <v-row>
             <v-text-field label="Email*" v-model="inscEmail" required></v-text-field>
           </v-row>
           <div v-if="errors.inscription.email" class="validate">{{errors.inscription.email}}</div>
-          <!-- <v-row>
-            <v-text-field label="Adresse(option)" v-model="inscAddress" required></v-text-field>
-          </v-row>
-          <div v-if="errors.inscription.email" class="validate">{{errors.inscription.address}}</div> -->
           <v-row>
             <v-text-field label="Mot de passe*" v-model="inscPassword" type="password" required>
             </v-text-field>
@@ -250,29 +250,33 @@ export default{
       isMobile:false,
       action:"",
       notifs:[
-        {
-            msg:"i like you dskhfgydsgfjgfys"
-        },
-        {
-            msg:"me too dksgfyjsdfjshfushukdhfku"
-        },
+        // {
+        //     msg:"i like you dskhfgydsgfjgfys"
+        // },
+        // {
+        //     msg:"me too dksgfyjsdfjshfushukdhfku"
+        // },
       ],
-      connEmail:"",
+      connIdentif:"",
       connPassword:"",
 
+      inscIdentif:"",
       inscEmail:"",
       inscAddress:"",
       inscPassword:"",
       inscPasswordVerrif:"",
 
+      inscriptionError:"",
+      inscriptionSuccess:"",
 
       reg: /^(([^<>()\]\\.,;:\s@"]+(\.[^<>()\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/,
       errors:{
         connexion:{
-          email:"",
+          identif:"",
           password:""
         },
         inscription:{
+          identif:"",
           email:"",
           address:"",
           password:"",
@@ -282,6 +286,18 @@ export default{
       connexionError:"",
     };
 
+  },
+  sockets:{
+    // connect: function () {
+    //         console.log('socket connected')
+    // },
+    // customEmit: function (data) {
+    //         console.log('this method was fired by the socket server. eg: io.emit("customEmit", data)')
+    // }
+    notifReceived:function(data){
+      console.log(data);
+      this.notifs.unshift(data)
+    }
   },
 
   props:[
@@ -303,11 +319,26 @@ export default{
 
     ]
     this.action=""
-    console.log(process.env)
+    const query="http://localhost:3001/"+localStorage.getItem("userId")+"/notification";
+    this.axios.get(query)
+    .then((result)=>{
+      console.log(result.data.res);
+      this.notifs=result.data.res
+    })
+
+    // console.log(process.env)
+
 
   },
 
   methods: {
+    notifsNoReaded(){
+      var len=this.notifs.filter((element)=>{
+        return element.readed==0;
+      }).length
+      return len;
+    },
+
     detectMob() {
         const toMatch = [
             /Android/i,
@@ -323,24 +354,42 @@ export default{
             return navigator.userAgent.match(toMatchItem);
         });
     },
+    logout(){
+      const user={id:localStorage.getItem('userId')}
+      // this.$emit('chat_with',-1)
+      this.axios.post("http://localhost:3001/user/logout",user)
+      .then((result)=>{
+        console.log(result.data.res)
+        if (result.data.res) {
+          localStorage.removeItem('jwt')
+          localStorage.removeItem('userId')
+          window.location="/"
+
+        }
+      })
+    },
     emitCategory(id){
       this.$emit('category_id', id)
     },
 
     onSubmit(){
-      if(this.errors.connexion.email=="" && this.errors.connexion.password=="")
+      if(this.errors.connexion.identif=="" && this.errors.connexion.password=="")
       {
         console.log("submit")
-        var user={email:this.connEmail,password:this.connPassword}
+        var user={identif:this.connIdentif,password:this.connPassword}
         this.axios.post("http://localhost:3001/user/auth",user).then((res)=>{
           //console.log(res);
           if (!res.data.error){
             console.log(res.data.access_token);
-            localStorage.setItem('jwt',res.data.token)
-            localStorage.setItem('userId',res.data.userId)
-            // location.reload();
-            //this.$router.go({ name: 'match' })
-            window.location="/myProfile"
+            if (res.data.confirmed_email==1) {
+              localStorage.setItem('jwt',res.data.token)
+              localStorage.setItem('userId',res.data.userId)
+              window.location="/myProfile"
+            }
+            else {
+              this.connexionError="Vous devez confirmer votre email!"
+            }
+
           }
           else{
             console.log(res.data)
@@ -365,22 +414,41 @@ export default{
     //   console.log("hidePopUp")
     //   this.alertAuth=false
     // },
+    clickNotif(notifItem){
+      // var id=localStorage.getItem("userId");
+      // this.axios.post("http://localhost:3001/"+id+"/notification/readed",{id:notifId})
+      // .then((result)=>{
+      //   console.log(result);
+      //
+      // })
+      console.log(notifItem.id);
+      const notif={id:notifItem.id}
+      const query="http://localhost:3001/user/"+localStorage.getItem("userId")+"/notification/readed";
+      this.axios.post(query,notif)
+      .then((result)=>{
+        console.log(result.data.res);
+        // this.notifs=result.data.res
+        window.location="/profile/"+notifItem.from_user
+
+      })
+
+    },
     validateEmail(mail)
     {
       return this.reg.test(mail)
     },
     inscrire()
     {
-      if(this.errors.inscription.email=="" && this.errors.inscription.password=="")
+      if(this.errors.inscription.identif=="" &&
+          this.errors.inscription.email=="" &&
+          this.errors.inscription.password=="")
       {
         console.log("inscrire!")
-        var user={email:this.inscEmail,password:this.inscPassword}
+        var user={identif:this.inscIdentif,email:this.inscEmail,password:this.inscPassword}
         this.axios.post("http://localhost:3001/user/add",user).then((res)=>{
-          //console.log(res);
           if (!res.data.error){
-            // console.log("no err")
-            localStorage.setItem('jwt',res.data.access_token)
-            window.location="/myProfile"
+            console.log(res.data.res);
+            this.inscriptionSuccess=res.data.res
           }
           else{
             console.log(res.data)
@@ -391,15 +459,13 @@ export default{
     }
   },
   watch: {
-    connEmail:function(val){
+    connIdentif:function(val){
       //console.log(this.validateEmail(val))
 
       if(val=="")
-        this.errors.connexion.email="Ce champ est vide"
-      else if(this.validateEmail(val)==false)
-        this.errors.connexion.email="Vous devez remplir un email valide"
+        this.errors.connexion.identif="Ce champ est vide"
       else
-        this.errors.connexion.email=""
+        this.errors.connexion.identif=""
     },
     connPassword:function(val){
       if(val=="")
@@ -410,7 +476,12 @@ export default{
         this.errors.connexion.password=""
       }
     },
-
+    inscIdentif:function(val){
+      if(val=="")
+        this.errors.inscription.identif="Ce champ est vide"
+      else
+        this.errors.inscription.identif=""
+    },
     inscEmail:function(val){
       //console.log(this.validateEmail(val))
 
@@ -476,6 +547,9 @@ a{
 }
 .notif{
     cursor: pointer;
+}
+.noRead{
+  background-color: rgb(232, 234, 237);
 }
 .validate{
   color:red;

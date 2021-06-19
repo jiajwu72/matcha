@@ -4,11 +4,24 @@
 
       <v-row>
         <v-card style="width:100%;padding:10px;">
-          <h2>
-              <b-avatar button @click="profileOther" :src="profilImg"></b-avatar>
-              Mes informations
-          </h2>
+
           <b-row>
+            <b-col md="6">
+              <h2>
+                  <b-avatar button  :src="profilImg"></b-avatar>
+                  Mes informations
+              </h2>
+            </b-col>
+            <b-col md="6">
+              <v-text-field
+                v-model="email"
+                :rules="emailRules"
+                label="Email"
+                required
+              ></v-text-field>
+              <b-button v-b-modal.modal-2 variant="primary">Modifier Email</b-button>
+
+            </b-col>
             <b-col md="4" v-for="(item, index) in images" :key="index">
 
               <v-card>
@@ -17,22 +30,15 @@
                   </b-img>
                </label>
                <v-card-actions>
-                 <!-- <div style="width:100%;display:flex;"> -->
-
-                 <!-- <b-form id='test-form' @submit.stop.prevent="submitImg(index+1)" method="post" enctype="multipart/form-data"> -->
                   <b-form id='test-form' action="http://localhost:3001/upload" method="post" enctype="multipart/form-data">
                     <input type="hidden" name="userId" :value="userId">
                     <input type="hidden" name="imgIndex" :value="index+1">
                     <input type="hidden" name="alea" value="alea">
                     <input type="file" name="image" accept="image/*" class="form-control">
                     <b-button variant="primary" type="submit" style="margin-top:10px;">Upload</b-button>
-                    <b-button variant="primary" @click="defineProfil(index)" style="margin-top:10px;margin-left:20px;">Définir comme profil</b-button>
+                    <!-- <b-button variant="primary" type="submit" style="margin-top:10px;">Upload</b-button> -->
+                    <b-button variant="primary" @click="defineProfil(item)" style="margin-top:10px;margin-left:20px;">Définir comme profil</b-button>
                   </b-form>
-                 <!-- </div> -->
-                  <!-- <form action="http://localhost:3001/upload" method="post" enctype="multipart/form-data">
-                    <input type="file" accept="image/*" name="image" />
-                    <b-button variant="primary" type="submit">Upload</b-button>
-                  </form> -->
                </v-card-actions>
               </v-card>
             </b-col>
@@ -58,9 +64,21 @@
                   required
                 ></v-text-field>
               </b-col>
+              <b-col md="6">
+                <v-text-field
+                  v-model="age"
+                  label="Âge"
+                  type=number
+                  required
+                ></v-text-field>
+              </b-col>
+              <b-col md="6">
+                <v-select v-model="sex" :items="['masculin','féminin']" label="Sex" required>
+                </v-select>
+              </b-col>
 
               <b-col md="6">
-                <v-select v-model="sex" :items="['masculin','féminin']" label="sex" required>
+                <v-select v-model="orientation_sex" :items="['masculin','féminin']" label="Orientation sexuelle" required>
                 </v-select>
               </b-col>
               <b-col md="12">
@@ -85,67 +103,51 @@
       <v-row style="margin-top:15px;">
         <v-card style="width:100%;padding:10px;">
           <h2>Address</h2>
-          <vue-google-autocomplete id="map" :country="['fr']" class="form-control">
-          </vue-google-autocomplete>
-          <GoogleMap></GoogleMap>
+          <b-alert v-if="modifAddrSuccess" variant="success" show>{{modifAddrSuccess}}</b-alert>
+          <!-- <vue-google-autocomplete
+            placeholder="Saisissez votre localisation"
+            id="map"
+            :country="['fr']"
+            class="form-control"
+            v-on:placechanged="getAddressData">
+          </vue-google-autocomplete> -->
+
+          <vuetify-google-autocomplete
+            ref="address"
+            id="map"
+            classname="form-control"
+            placeholder="Saisissez votre localisation"
+            v-on:placechanged="getAddressData"
+            country="fr"
+            >
+            <template #append>
+                <!-- my fancy component rather than a simple icon -->
+                <my-btn/>
+            </template>
+        </vuetify-google-autocomplete>
+
+          <GoogleMap
+          :position="position">
+          </GoogleMap>
         </v-card>
       </v-row>
 
       <v-row style="margin-top:15px;">
         <v-card style="width:100%;padding:10px;">
           <h2>TAGS</h2>
-          <b-form-group label="choissisez les centres d'intéret.">
-            <b-form-tags v-model="tagValue" no-outer-focus class="mb-2">
-              <template v-slot="{ tags, disabled, addTag, removeTag }">
-                <ul v-if="tags.length > 0" class="list-inline d-inline-block mb-2">
-                  <li v-for="tag in tags" :key="tag" class="list-inline-item">
-                    <b-form-tag
-                      @remove="removeTag(tag)"
-                      :title="tag"
-                      :disabled="disabled"
-                      variant="info"
-                    >{{ tag }}</b-form-tag>
-                  </li>
-                </ul>
-
-                <b-dropdown size="sm" variant="outline-secondary" block menu-class="w-100">
-                  <template v-slot:button-content>
-                    <b-icon icon="tag-fill"></b-icon> Ajoutez tags
-                  </template>
-                  <b-dropdown-form @submit.stop.prevent="() => {}">
-                    <b-form-group
-                      label-for="tag-search-input"
-                      label="Search tags"
-                      label-cols-md="auto"
-                      class="mb-0"
-                      label-size="sm"
-                      :description="searchDesc"
-                      :disabled="disabled"
-                    >
-                      <b-form-input
-                        v-model="search"
-                        id="tag-search-input"
-                        type="search"
-                        size="sm"
-                        autocomplete="off"
-                       ></b-form-input>
-                    </b-form-group>
-                  </b-dropdown-form>
-                  <b-dropdown-divider></b-dropdown-divider>
-                  <b-dropdown-item-button
-                    v-for="option in availableOptions"
-                    :key="option"
-                    @click="onOptionClick({ option, addTag })"
-                  >
-                    {{ option }}
-                  </b-dropdown-item-button>
-                  <b-dropdown-text v-if="availableOptions.length === 0">
-                    There are no tags available to select
-                  </b-dropdown-text>
-                </b-dropdown>
-              </template>
-            </b-form-tags>
-          </b-form-group>
+          <multiselect v-model="tagsSelected"
+                      :options="tagsItems"
+                      :multiple="true"
+                      :close-on-select="false"
+                      :clear-on-select="false"
+                      :preserve-search="true"
+                      placeholder="Ajoutez des centres d'intérêts."
+                      label="name" track-by="name"
+                      :preselect-first="true"
+                      @select="addTag"
+                      @remove="deleteTag"
+          >
+          </multiselect>
         </v-card>
       </v-row>
       <v-row style="margin-top:15px;">
@@ -159,11 +161,18 @@
       <v-row style="margin-top:15px;">
         <v-card style="width:100%;padding:10px;">
           <h2>Visiteurs</h2>
+
           <!-- v-for ici -->
-          <b-avatar button @click="profileOther" src="https://placekitten.com/300/300"></b-avatar>
+          <!-- src="https://placekitten.com/300/300" -->
+          <b-avatar button
+                    v-for="(item, index) in visitors" :key="index"
+                    @click="profileOther(item)"
+                    :src="item.selectImg">
+          </b-avatar>
         </v-card>
       </v-row>
     </v-container>
+
     <b-modal id="modal-1" title="Changer votre mot de passe" hide-footer>
       <b-row>
         <b-alert v-if="mailSendSuccess" variant="success" show style="margin-left:15px;">{{mailSendSuccess}}</b-alert>
@@ -180,22 +189,39 @@
         </b-col>
       </b-row>
     </b-modal>
+
+    <b-modal id="modal-2" title="Changer votre Email" hide-footer>
+      <v-text-field
+        v-model="email"
+        :rules="emailRules"
+        label="Email"
+        required
+      ></v-text-field>
+      <b-button variant="primary" @click="changeEmail">Valider</b-button>
+    </b-modal>
   </div>
 </template>
 
 <script>
 // import VueSuggestion from 'vue-suggestion'
-import VueGoogleAutocomplete from 'vue-google-autocomplete'
+//import VueGoogleAutocomplete from 'vue-google-autocomplete'
+import Multiselect from 'vue-multiselect'
 import GoogleMap from '@/components/common/GoogleMap';
+import VuetifyGoogleAutocomplete from "vuetify-google-autocomplete"
 export default{
   name:"ProfileUser",
   components: {
-    VueGoogleAutocomplete,
+    //VueGoogleAutocomplete,
     GoogleMap,
+    Multiselect,
+    VuetifyGoogleAutocomplete
   },
   props: [],
   data () {
     return {
+      age:18,
+      email:"",
+      orientation_sex:"",
       biographe:"",
       popScore:"",
       profilImg:"",
@@ -203,16 +229,22 @@ export default{
       selectedImgIndex:-1,
       selectedImg:null,
       modifSuccess:"",
+      modifAddrSuccess:"",
       mailSendSuccess:"",
-      options: ['Nourriture', 'Sport', 'Programmation', 'Voyage'],
+      tagsItems: [],
       search: '',
-      tagValue: [],
+      value: [],
       isUpdating:false,
       sex:"",
       tagsSelected:[],
       lastName:"",
       firstName:"",
       address:"",
+      locality:"",
+      latitude:0,
+      longitude:0,
+      position:{},
+      visitors:[],
       addressRules: [
         v => !!v || 'Ce champ doit être remplis',
       ],
@@ -220,7 +252,7 @@ export default{
         v => !!v || 'Ce champ doit être remplis',
         v => v.length <= 15 || 'il doit comporter au maximun 15 caractères',
       ],
-      email: '',
+      // email: '',
       emailRules: [
         v => !!v || 'Ce champ doit être remplis',
         v => /.+@.+/.test(v) || 'E-mail doit être requis',
@@ -230,21 +262,24 @@ export default{
         sport:true,
         voyage:true,
       },
-      tags:[
-        "Nourriture",
-        "Sport",
-        "Voyage",
-      ],
+
       images:[],
     }
   },
+  
   created() {
+    //this.$refs.address.focus();
     const id=localStorage.getItem("userId")
     this.userId=id;
+    this.getTags();
+    this.getTagMatch();
+    //this.address = "paris"
     this.axios.get("http://localhost:3001/user/"+id+"/get")
     .then((result)=>{
-      console.log(result.data.res)
+      console.log("result",result.data.res)
       result=result.data.res
+      this.address = result.locality
+      this.email=result.email
       this.firstName=result.first_name
       this.lastName=result.last_name
       this.sex=result.sex==0?"masculin":"féminin"
@@ -253,36 +288,45 @@ export default{
       this.images[2]=result.img3
       this.images[3]=result.img4
       this.images[4]=result.img5
-      this.profilImg=this.images[result.selectImg-1]
+      this.age=result.age
+      this.profilImg=result.selectImg
       this.popScore=result.pop_score
-      // this.email=result.email
       this.biographe=result.biographe
+      this.locality=result.locality
+      this.code_postal=result.postal_code
+      this.latitude=result.latitude
+      this.longitude=result.longitude
+      this.orientation_sex=result.orientation==0?"masculin":"féminin"
+      this.position={lat:parseFloat(this.latitude),lng:parseFloat(this.longitude)}
+      console.log("this.position:",this.position);
+      this.axios.post("http://localhost:3001/action/listActionArray",{to_user:id,table:"consulted"})
+      .then((result)=>{
+        console.log(result.data.res);
+        this.visitors=result.data.res
+
+      })
     })
   },
-  computed: {
-      criteria() {
-        // Compute the search criteria
-        return this.search.trim().toLowerCase()
-      },
-      availableOptions() {
-        const criteria = this.criteria
-        // Filter out already selected options
-        const options = this.options.filter(opt => this.tagValue.indexOf(opt) === -1)
-        if (criteria) {
-          // Show only options that match criteria
-          return options.filter(opt => opt.toLowerCase().indexOf(criteria) > -1);
-        }
-        // Show all options available
-        return options
-      },
-      searchDesc() {
-        if (this.criteria && this.availableOptions.length === 0) {
-          return 'There are no tags matching your search criteria'
-        }
-        return ''
-      }
-    },
+
   methods: {
+    getAddressData(e){
+      console.log(e);
+      const user={id:localStorage.getItem('userId')};
+      user.locality=e.name
+      user.code_postal=e.postal_code
+      user.latitude=e.latitude
+      user.longitude=e.longitude
+      this.axios.post("http://localhost:3001/user/"+user.id+"/update",user)
+      .then((result)=>{
+        console.log(result);
+        this.modifAddrSuccess=result.data.msg
+        //location.reload();
+      })
+      .catch((e)=>{
+        console.log(e);
+      })
+    },
+
     logout(){
       const user={id:localStorage.getItem('userId')}
       this.axios.post("http://localhost:3001/user/logout",user)
@@ -297,18 +341,37 @@ export default{
       })
     },
 
+    getTags(){
+      this.axios.get("http://localhost:3001/tag/listTag")
+      .then((result)=>{
+        // console.log(result.data.res);
+        this.tagsItems=result.data.res
+      })
+    },
+    getTagMatch(){
+      const query="http://localhost:3001/tag/getMatch/"+this.userId;
+      console.log(query);
+      this.axios.get(query)
+      .then((result)=>{
+        console.log(result.data.res);
+        this.tagsSelected=result.data.res
+      })
+    },
     modif(){
       // if(this.modifValid()){
         const id=localStorage.getItem('userId')
         const sex=this.sex=="masculin"?0:1;
+        const orientation=this.orientation_sex=="masculin"?0:1;
         const user={
-          id:id,sex:sex,last_name:this.lastName,first_name:this.firstName,biographe:this.biographe
+          id:id,sex:sex,last_name:this.lastName,first_name:this.firstName,
+          biographe:this.biographe,orientation:orientation,age:this.age
         };
         console.log(user);
         this.axios.post("http://localhost:3001/user/"+id+"/update",user)
         .then((result)=>{
           console.log(result);
-          this.modifSuccess=result.data
+          this.popScore=result.data.user.pop_score
+          this.modifSuccess=result.data.msg
           // location.reload();
         })
         .catch((e)=>{
@@ -329,15 +392,23 @@ export default{
         console.log(e);
       })
     },
-    profileOther(){},
-
-    onOptionClick({ option, addTag }) {
-      addTag(option)
-
-      this.search = ''
+    profileOther(item){
+      this.axios.post("http://localhost:3001/consulted",
+      {
+        from_user:localStorage.getItem("userId"),
+        to_user:item.id,
+      })
+      .then((result)=>{
+        console.log(result);
+        window.location="/profile/"+item.id
+      })
+      .catch((e)=>{
+        console.log(e);
+      })
     },
-    defineProfil(index){
-      const request={id:this.userId,selectImg:index+1}
+    defineProfil(item){
+      this.selectImg=item
+      const request={id:this.userId,selectImg:this.selectImg}
       console.log(request);
       this.axios.post("http://localhost:3001/user/"+this.userId+"/defineProfil",request)
       .then((result)=>{
@@ -345,31 +416,45 @@ export default{
         window.location="/myProfile"
       })
     },
-
-    // async onImgSelected(event){
-    //
-    //   this.selectedImg=event;
-    //   // console.log(e);
-    // },
-
-    // async submitImg(index){
-    //   this.selectedImgIndex=index;
-    //   console.log(this.selectedImg);
-    //   var formData=new FormData();
-    //   // formData.append('image',this.selectedImg)
-    //   formData.append('userId',this.userId)
-    //   formData.append('imgIndex',this.selectedImgIndex)
-    //   console.log(formData.image);
-    //   console.log(formData.values());
-    //
-    //   const query={userId:localStorage.userId,imgIndex:index}
-    //   console.log("query:",query);
-    //   await this.axios.post("http://localhost:3001/upload",formData)
-    //   .then((res)=>{
-    //     console.log(res)
-    //   })
-    // }
-
+    addTag(e){
+      console.log("addTag:",e);
+      this.axios.post("http://localhost:3001/tag/matchUser",{tag_id:e.id,user_id:this.userId})
+      .then((result)=>{
+        console.log("results:",result);
+        // this.tagsItems=result
+      })
+      .catch((e)=>{
+        console.log("error",e);
+      })
+    },
+    deleteTag(e){
+      console.log("deleteTag:",e);
+      const tagged={tag_id:e.id,user_id:this.userId}
+      console.log("tagged:",tagged);
+      this.axios.delete("http://localhost:3001/tag/deleteMatch",{data:tagged})
+      .then((result)=>{
+        console.log("results:",result);
+        // this.tagsItems=result
+      })
+      .catch((e)=>{
+        console.log("error",e);
+      })
+    },
+    changeEmail(){
+      const id=localStorage.getItem('userId')
+      const user={id:id,email:this.email}
+      this.axios.post("http://localhost:3001/user/"+id+"/updateEmail",user)
+      .then((result)=>{
+        console.log(result);
+        // localStorage.removeItem('jwt')
+        // localStorage.removeItem('userId')
+        // window.location="/"
+        // location.reload();
+      })
+      .catch((e)=>{
+        console.log(e);
+      })
+    }
   }
 }
 

@@ -5,6 +5,7 @@ import Match from '@/views/common/Match'
 import ProfileOther from '@/views/common/ProfileOther'
 import ProfileUser from '@/views/common/ProfileUser'
 import Reset from '@/views/common/Reset'
+import Confirm from '@/views/common/ConfirmMail'
 import AuthMiddleware from '@/middleware/auth'
 
 
@@ -46,6 +47,11 @@ const router= new Router({
         path:'/reset/:token',
         name:'reset',
         component:Reset,
+    },
+    {
+        path:'/confirmMail/:token',
+        name:'confirm',
+        component:Confirm,
     },
   ],
   mode:'history',
